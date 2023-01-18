@@ -13,47 +13,66 @@ namespace LDAP_ConsoleApp
       
         static void Main(string[] args)
         {
-        
-            IsAuth();
-            print();
+            //varijable za login
+            string user;
+            string password;
+            
+            //upit za user
+            Console.WriteLine("User:");
+            user = Console.ReadLine();
 
+            //upit za password
+            Console.WriteLine("Password: ");
+            password = Console.ReadLine();
+
+            //autentikacija usera
+            bool auth = AuthenticateUser( user, password);
+
+            //print uspjesne/neuspjesne autentikacije
+            print(auth);
+            getGroupUsers("Studenti");
+            
         }
-       
 
-        static bool IsAuth()
+        // funkcija provjere autentikacije koja prima uneseni user i password
+         static bool AuthenticateUser(string user, string password)
         {
-           bool Valid = false;
-
+            bool isValid = false;
             try
             {
-                DirectoryEntry entry = new DirectoryEntry("LDAP://WIN-9FIKOFC9GQF", "GECEVIC\\matko", "Pa$$w0rd");
-                object nativeObj = entry.NativeObject;
-                Valid = true;
-            }
-            catch (DirectoryServicesCOMException comex)
-            {
-                //Not Authenticated. comex.Message will return the reason
-            }
-            return Valid;
+                // provjera usera i passworda
 
+                DirectoryEntry de = new DirectoryEntry("LDAP://WIN-0R2TTEN8F02","GECEVIC\\"+user, password);
+                object nativeObj = de.NativeObject;
+                isValid = true;
+            }
+            catch
+            {
+                isValid = false;
+            }
+
+            return isValid;
         }
-        static void print()
+
+        //print funkcija koja prima bool auth(user logiran ili ne) te prema toma ispisuje odgovarajuću poruku
+        static void print(bool auth)
         {
-            if(IsAuth() == true)
+            if (auth == true)
             {
-                Console.WriteLine("User is authenticated!");
+                Console.WriteLine("User authenticated!");
             }
-            else 
+            else
             {
-                Console.WriteLine("User is not authenticated!");
+                Console.WriteLine("User or password is wrong!");
             }
         }
 
+        // funkcija provjere svih uneseni usera u LDAP
         public static List<String> getGroupUsers(String strGroup)
         {
             List<String> groupMembers = new List<String>();
 
-            PrincipalContext contex = new PrincipalContext(ContextType.Domain, "192.168.100.64", "GECEVIC\\Administrator", "Pa$$w0rd");
+            PrincipalContext contex = new PrincipalContext(ContextType.Domain, "192.168.100.69", "GECEVIC\\Administrator", "Pa$$w0rd");
 
             GroupPrincipal Group = GroupPrincipal.FindByIdentity(contex, strGroup);
 
